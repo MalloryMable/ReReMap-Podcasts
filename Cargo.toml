@@ -1,0 +1,9 @@
+[workspace]
+resolver = "3"
+members = ["db", "net-tools", "graph-tools"]
+
+[workspace.dependencies]
+db = { path = "db" }
+
+sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls", "mysql", "macros", "migrate"] }
+tokio = { version = "1", features = ["full"] }
