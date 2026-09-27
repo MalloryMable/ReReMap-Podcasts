@@ -8,8 +8,8 @@ reqwest = "0.12"
 rss = "2"
 regex = "1"
 sha2 = "0.10"
-chrono = "0.4"
 
+chrono = { workspace = true }
 db = { workspace = true }
 sqlx = { workspace = true }
 tokio = { workspace = true }

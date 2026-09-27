@@ -17,7 +17,7 @@ pub async fn resolve_alias(pool: &MySqlPool, name: &str) -> Result<u64, sqlx::Er
     create_person(pool, name).await
 }
 
-pub async fn process_episode_guests(
+pub async fn process_guests(
     pool: &MySqlPool,
     episode_id: u64,
     title: &str,
@@ -27,14 +27,14 @@ pub async fn process_episode_guests(
     let mut matched_person_ids: HashSet<u64> = HashSet::new();
 
     for rule in rules {
-        for name in rule.extract_all(title, description) {
-            let person_id = resolve_or_create_person(pool, &name).await?;
+        for name in rule.extract(title, description) {
+            let person_id = resolve_alias(pool, &name).await?;
             matched_person_ids.insert(person_id);
         }
     }
 
     for person_id in matched_person_ids {
-        add_episode_appearance(pool, episode_id, person_id).await?;
+        add_appearance(pool, episode_id, person_id).await?;
     }
 
     Ok(())

@@ -165,3 +165,35 @@ pub async fn update_podcast_url(
         .await?;
     Ok(())
 }
+
+pub async fn mark_check_success(pool: &MySqlPool, podcast_id: u64) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "UPDATE podcasts
+         SET last_checked_at = NOW(), last_success_at = NOW(), consecutive_failures = 0
+         WHERE id = ?",
+    )
+    .bind(podcast_id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn mark_check_failure(
+    pool: &MySqlPool,
+    podcast_id: u64,
+    deactivate_after: u32,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "UPDATE podcasts
+         SET last_checked_at = NOW(),
+             consecutive_failures = consecutive_failures + 1,
+             is_active = IF(consecutive_failures + 1 >= ?, FALSE, is_active)
+         WHERE id = ?",
+    )
+    .bind(deactivate_after)
+    .bind(podcast_id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+

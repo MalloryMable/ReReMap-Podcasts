@@ -120,6 +120,8 @@ impl NetworkModel {
 
             //TODO: Toggle for EXACT time from mp3 metadata(much slower)
 
+            //TODO: Filter episodes here
+
             let published_at = item.pub_date()
                 .and_then(|d| DateTime::parse_from_rfc2822(d).ok())
                 .map(|d| d.naive_utc());

@@ -48,3 +48,23 @@ pub struct PodcastHost {
     pub podcast_id: u64,
     pub person_id: u64,
 }
+
+
+// Tables for parsing episodes for guests
+#[derive(Debug, Clone, Copy, PartialEq, Eq, sqlx::Type)]
+#[sqlx(rename_all = "lowercase")]
+pub enum RuleTargetField {
+    Title,
+    Description,
+}
+
+/// Row from `parsing_rules`. `podcast_id: None` means a global fallback rule
+#[derive(Debug, Clone, sqlx::FromRow)]
+pub struct FeedParsingRuleRow {
+    pub id: u64,
+    pub podcast_id: Option<u64>,
+    pub target_field: RuleTargetField,
+    pub pattern: String,
+    pub capture_group: i32,
+    pub priority: i32,
+}

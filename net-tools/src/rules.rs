@@ -13,17 +13,8 @@ pub struct CompiledRule {
 }
 
 impl CompiledRule {
-    /// First match only.
-    pub fn extract(&self, title: &str, description: &str) -> Option<String> {
-        let text = self.field_text(title, description);
-        self.regex.captures(text).and_then(|caps| {
-            caps.get(self.capture_group).map(|m| m.as_str().trim().to_string())
-        })
-    }
-
-    /// Every match in the field -- the ingest loop uses this so a description
-    /// naming several guests captures all of them, not just the first.
-    pub fn extract_all(&self, title: &str, description: &str) -> Vec<String> {
+    // Extracts all possible guest matching the our pattern
+    pub fn extract(&self, title: &str, description: &str) -> Vec<String> {
         let text = self.field_text(title, description);
         self.regex.captures_iter(text)
             .filter_map(|caps| caps.get(self.capture_group).map(|m| m.as_str().trim().to_string()))

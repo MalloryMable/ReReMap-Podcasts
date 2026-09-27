@@ -29,6 +29,7 @@ pkgs.mkShell {
     mariadb
     sqlx-cli
     pkg-config
+    openssl
   ]; # trim the rust-toolchain entries if you already manage those elsewhere
 
   shellHook = ''

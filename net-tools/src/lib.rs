@@ -55,7 +55,7 @@ pub async fn ingest_podcast(
         // NOTE: Existing eps get None might want a more expressive error here
         if let Some(episode_id) = queries::insert_episode(pool, &episode).await? {
             let description = episode.raw_description.as_deref().unwrap_or("");
-            people::process_episode_guests(pool, episode_id, &episode.title, description, rules).await?;
+            people::process_guests(pool, episode_id, &episode.title, description, rules).await?;
         }
     }
 

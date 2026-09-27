@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-db = { path = "../db" }
-sqlx.workspace = true
-tokio.workspace = true
+db = { workspace = true }
+sqlx = { workspace = true }
+tokio = { workspace = true }
