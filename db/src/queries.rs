@@ -32,24 +32,28 @@ pub async fn insert_podcast(
     Ok(result.last_insert_id())
 }
 
-pub async fn insert_episode(pool: &MySqlPool, ep: &Episode) -> Result<u64, sqlx::Error> {
+pub async fn insert_episode(
+    pool: &MySqlPool,
+    ep: &Episode
+) -> Result<Option<u64>, sqlx::Error> {
     let result = sqlx::query(
-        "INSERT INTO episodes (podcast_id, guid, title, audio_url, published_at, raw_description)
-         VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT IGNORE INTO episodes (podcast_id, guid, title, published_at, raw_description)
+         VALUES (?, ?, ?, ?, ?)",
     )
     .bind(ep.podcast_id)
     .bind(&ep.guid)
     .bind(&ep.title)
-    .bind(&ep.audio_url)
     .bind(ep.published_at)
     .bind(&ep.raw_description)
     .execute(pool)
     .await?;
 
-    Ok(result.last_insert_id())
+    // last_insert_id() returns 0 if INSERT IGNORE skips a duplicate
+    let id = result.last_insert_id();
+    Ok(if id == 0 { None } else { Some(id) })
 }
 
-pub async fn add_person_alias(
+pub async fn add_alias(
     pool: &MySqlPool,
     person_id: u64,
     alias: &str,
@@ -62,7 +66,7 @@ pub async fn add_person_alias(
     Ok(())
 }
 
-pub async fn set_podcast_host(
+pub async fn set_host(
     pool: &MySqlPool,
     podcast_id: u64,
     person_id: u64,
@@ -75,7 +79,7 @@ pub async fn set_podcast_host(
     Ok(())
 }
 
-pub async fn add_episode_appearance(
+pub async fn add_appearance(
     pool: &MySqlPool,
     episode_id: u64,
     person_id: u64,
@@ -110,7 +114,7 @@ pub async fn get_episode_roles(
     .await
 }
 
-pub async fn find_person_id_by_name_or_alias(
+pub async fn find_id_by_alias(
     pool: &MySqlPool,
     name: &str,
 ) -> Result<Option<u64>, sqlx::Error> {
@@ -127,11 +131,24 @@ pub async fn find_person_id_by_name_or_alias(
 }
 
 pub async fn insert_person(pool: &MySqlPool, name: &str) -> Result<u64, sqlx::Error> {
+    let mut tx = pool.begin().await?;
+
     let result = sqlx::query("INSERT INTO people (name) VALUES (?)")
         .bind(name)
-        .execute(pool)
+        .execute(&mut *tx)
         .await?;
-    Ok(result.last_insert_id())
+
+    let person_id = result.last_insert_id();
+
+    sqlx::query("INSERT INTO person_aliases (person_id, alias) VALUES (?, ?)")
+        .bind(person_id)
+        .bind(name)
+        .execute(&mut *tx)
+        .await?;
+
+    tx.commit().await?;
+
+    Ok(person_id)
 }
 
 pub async fn update_podcast_url(

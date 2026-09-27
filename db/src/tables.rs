@@ -33,7 +33,6 @@ pub struct Episode {
     pub podcast_id: u64,
     pub guid: String,
     pub title: String,
-    pub audio_url: Option<String>,
     pub published_at: DateTime<Utc>,
     pub raw_description: Option<String>,
 }

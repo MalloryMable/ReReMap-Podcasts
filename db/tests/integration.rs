@@ -32,15 +32,16 @@ mod tests {
 
         // insert episode
         let ep = Episode {
-            id: 0,
-            podcast_id,
-            guid: "ep-1".to_string(),
-            title: "Episode 1".to_string(),
-            audio_url: None,
-            published_at: Utc::now(),
-            raw_description: None,
-        };
-        let episode_id = insert_episode(&pool, &ep).await.unwrap();
+        id: 0,
+        podcast_id,
+        guid: "ep-1".to_string(),
+        title: "Episode 1".to_string(),
+        published_at: Utc::now(),
+        raw_description: None,
+};
+
+
+        let episode_id = insert_episode(&pool, &ep).await.unwrap().expect("Episode was duplicate");
 
         // delete podcast
         sqlx::query("DELETE FROM podcasts WHERE id = ?")
