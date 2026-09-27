@@ -1,6 +1,6 @@
 use sqlx::MySqlPool;
 
-use crate::tables::{Episode, Podcast};
+use crate::tables::{Episode, FeedParsingRuleRow, Podcast};
 
 pub async fn get_podcast_by_hash(
     pool: &MySqlPool,
@@ -197,3 +197,21 @@ pub async fn mark_check_failure(
     Ok(())
 }
 
+///
+pub async fn get_parsing_rules(
+    pool: &MySqlPool,
+    podcast_id: u64,
+) -> Result<Vec<FeedParsingRuleRow>, sqlx::Error> {
+    sqlx::query_as::<_, FeedParsingRuleRow>(
+        r#"
+        SELECT * FROM parsing_rules
+        WHERE podcast_id = ? OR podcast_id IS NULL
+        ORDER BY
+            (podcast_id IS NULL) ASC,
+            priority DESC
+        "#
+    )
+    .bind(podcast_id)
+    .fetch_all(pool)
+    .await
+}

@@ -108,6 +108,7 @@ async fn test_mark_check_failure_deactivates_after_threshold(pool: MySqlPool) {
 }
 
 #[sqlx::test]
+// TODO: plug these into apis once I have structure queiries.rs
 async fn test_get_rules_for_podcast_orders_specific_before_global(pool: MySqlPool) {
     let podcast_id = insert_podcast(&pool, "Rules Pod", "url", "hash")
         .await
@@ -130,7 +131,7 @@ async fn test_get_rules_for_podcast_orders_specific_before_global(pool: MySqlPoo
     .await
     .unwrap();
 
-    let rules = get_rules_for_podcast(&pool, podcast_id).await.unwrap();
+    let rules = get_parsing_rules(&pool, podcast_id).await.unwrap();
 
     assert_eq!(rules.len(), 2);
     assert_eq!(
